@@ -53,5 +53,14 @@ export async function verifyTmweasySlip(input: {
   if (!response.ok) {
     throw new Error("TMW_EASY_UNAVAILABLE");
   }
-  return response.json() as Promise<TmweasyResponse>;
+  const result = await response.json() as TmweasyResponse;
+  await logger.info("payment.tmweasy_verified", {
+    userId: input.userId,
+    status: result.status,
+    requestOne: result.request_one,
+    refTxid: result.ref_txid,
+    amount: result.amount,
+  });
+  return result;
 }
+import { logger } from "../logger.ts";

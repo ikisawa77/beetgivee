@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { logger } from "../logger.ts";
 
 const aiPickSchema = z.object({
   league: z.string().min(1),
@@ -59,5 +60,7 @@ export async function analyzeOddsImage(input: {
   const content = payload.choices?.[0]?.message?.content;
   if (!content) throw new Error("HERMES_INVALID_RESPONSE");
   const parsed = aiResponseSchema.parse(JSON.parse(content.replace(/^```json\s*|\s*```$/g, "")));
-  return parsed.picks.map(toPublishableDraft);
+  const drafts = parsed.picks.map(toPublishableDraft);
+  await logger.info("ai.hermes_draft_created", { pickCount: drafts.length, confidences: drafts.map((draft) => draft.confidence) });
+  return drafts;
 }
