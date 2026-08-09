@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import type { Ad } from "../lib/ads";
 import { visiblePicks } from "../lib/tips";
 import { defaultSiteSettings, type SiteSettings } from "../lib/site-settings";
+import { MemberMenu, type MemberIdentity } from "../components/member-menu";
 
 type Pick = { id: string; time: string; home: string; away: string; pick: string; odds: string; confidence: number; locked?: boolean };
 type League = { name: string; country: string; picks: Pick[] };
@@ -37,15 +38,17 @@ export default function HomePage() {
   const allPicks = leagues.flatMap((league) => league.picks);
   const [liveAds, setLiveAds] = useState<Ad[]>(ads);
   const [settings, setSettings] = useState<SiteSettings>(defaultSiteSettings);
+  const [member, setMember] = useState<MemberIdentity | null>(null);
   useEffect(() => { fetch("/api/ads").then((response) => response.ok ? response.json() : null).then((items) => { if (Array.isArray(items) && items.length) setLiveAds(items); }).catch(() => undefined); }, []);
   useEffect(() => { fetch("/api/settings").then((response) => response.ok ? response.json() : null).then((data) => { if (data) setSettings({ ...defaultSiteSettings, ...data }); }).catch(() => undefined); }, []);
+  useEffect(() => { fetch("/api/auth/session").then((response) => response.ok ? response.json() : null).then((data) => setMember(data?.member ?? null)).catch(() => undefined); }, []);
   const sliderAds = liveAds.filter((ad) => ad.placement === "HOME_SLIDER" && ad.active);
   const [slide, setSlide] = useState(0);
   const isMember = false;
   const displayPicks = visiblePicks(allPicks, isMember);
   const visibleIds = new Set(displayPicks.map((pick) => pick.id));
   return <main className="site-shell">
-    <header className="topbar"><div className="topbar-inner"><Logo settings={settings} /><nav className="nav-links"><a href="#tips">ทีเด็ดวันนี้</a><Link href="/results">สรุปผลการแข่งขัน</Link><Link href="/plans">แพ็กเกจสมาชิก</Link></nav><div className="nav-actions"><Link className="ghost-btn" href="/login">เข้าสู่ระบบ</Link><Link className="solid-btn" href="/signup">สมัครสมาชิก</Link></div></div></header>
+    <header className="topbar"><div className="topbar-inner"><Logo settings={settings} /><nav className="nav-links"><a href="#tips">ทีเด็ดวันนี้</a><Link href="/results">สรุปผลการแข่งขัน</Link><Link href="/plans">แพ็กเกจสมาชิก</Link></nav><div className="nav-actions">{member ? <MemberMenu member={member} /> : <><Link className="ghost-btn" href="/login">เข้าสู่ระบบ</Link><Link className="solid-btn" href="/signup">สมัครสมาชิก</Link></>}</div></div></header>
     <section className="hero"><div className="hero-inner"><div><h1>ทีเด็ดบอลวันนี้<br />คัดให้ทุกคู่สำคัญ</h1><p className="hero-copy">{settings.description}</p></div><div className="hero-date"><div className="date">09 ส.ค. 2026</div><div className="label">วันอาทิตย์ · อัปเดตล่าสุด 10:30 น.</div></div></div></section>
     <section className="ad-slider" aria-label="โฆษณา">{sliderAds.map((ad, index) => index === slide && <Link key={ad.id} href={ad.targetUrl ?? "/"} className="ad-slide"><img src={ad.imageUrl} alt={ad.title ?? "โฆษณา"} /><span className="ad-overlay"><small>BETPAY PROMOTION</small><strong>{ad.title}</strong><b>ดูรายละเอียด</b></span></Link>)}<button className="ad-nav left" aria-label="โฆษณาก่อนหน้า" onClick={() => setSlide((slide + sliderAds.length - 1) % sliderAds.length)}><ChevronLeft size={18} /></button><button className="ad-nav right" aria-label="โฆษณาถัดไป" onClick={() => setSlide((slide + 1) % sliderAds.length)}><ChevronRight size={18} /></button><div className="ad-dots">{sliderAds.map((ad, index) => <button aria-label={`โฆษณา ${index + 1}`} className={index === slide ? "active" : ""} key={ad.id} onClick={() => setSlide(index)} />)}</div></section>
     <div className="page" id="tips"><div className="toolbar"><h2>ทีเด็ดฟุตบอลวันนี้</h2><div className="toolbar-meta"><span className="live-dot" />กำลังเปิดรับข้อมูล <span>·</span> {allPicks.length} คู่</div></div>
