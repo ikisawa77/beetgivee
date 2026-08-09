@@ -1,0 +1,11 @@
+"use client";
+
+import Link from "next/link";
+import { ArrowRight, UserRoundPlus } from "lucide-react";
+import { FormEvent, useState } from "react";
+
+export default function SignupPage() {
+  const [created, setCreated] = useState(false);
+  function submit(event: FormEvent<HTMLFormElement>) { event.preventDefault(); setCreated(true); }
+  return <main className="auth-shell"><Link href="/" className="auth-logo">Bet<span>Pay</span></Link><section className="auth-card"><div className="auth-icon"><UserRoundPlus size={19} /></div><div className="simple-kicker">JOIN BETPAY</div><h1>สมัครสมาชิก</h1><p>เริ่มต้นด้วยบัญชีฟรี แล้วเลือกแพ็กเกจ Silver</p>{created ? <><div className="success-note">สร้างบัญชีตัวอย่างแล้ว กำลังพาไปเลือกแพ็กเกจ</div><Link className="auth-submit as-link" href="/plans">เลือกแพ็กเกจ <ArrowRight size={17} /></Link></> : <form onSubmit={submit}><label>ชื่อที่แสดง<input required placeholder="ชื่อเล่นของคุณ" /></label><label>อีเมล<input type="email" required placeholder="you@example.com" /></label><label>รหัสผ่าน<input type="password" required minLength={8} placeholder="อย่างน้อย 8 ตัวอักษร" /></label><button className="auth-submit">สร้างบัญชี <ArrowRight size={17} /></button></form>}<div className="auth-foot">มีบัญชีแล้ว? <Link href="/login">เข้าสู่ระบบ</Link></div></section></main>;
+}

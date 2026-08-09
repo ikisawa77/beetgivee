@@ -5,3 +5,4 @@ out
 !.env.example
 coverage
 *.log
+output/
