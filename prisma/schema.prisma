@@ -221,3 +221,18 @@ model Advertisement {
   updatedAt DateTime    @updatedAt
   @@index([placement, active, sortOrder])
 }
+
+model SiteSetting {
+  id          Int      @id @default(1)
+  siteName    String   @default("BetPay")
+  tagline     String   @default("ทีเด็ดฟุตบอล คัดสรรด้วยข้อมูล")
+  description String   @default("ฟุตบอลทีเด็ดคัดโดยทีมงานและ AI พร้อมสรุปผลรายวัน เพื่อใช้ประกอบการตัดสินใจ")
+  logoUrl     String   @default("")
+  phone       String   @default("")
+  lineId      String   @default("")
+  facebookUrl String   @default("")
+  email       String   @default("")
+  footerText  String   @default("ข้อมูลเพื่อประกอบการตัดสินใจเท่านั้น โปรดใช้วิจารณญาณในการรับชม")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
