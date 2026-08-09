@@ -3,7 +3,9 @@ setlocal
 cd /d "%~dp0"
 
 if not exist ".runtime\dev-server.pid" (
-  echo No BetPay server PID file was found.
+  powershell -NoProfile -Command "$connection = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue; if (-not $connection) { exit 0 }; $process = Get-CimInstance Win32_Process -Filter ('ProcessId=' + $connection.OwningProcess); if ($process.CommandLine -like '*D:\BetPay*next*') { Stop-Process -Id $connection.OwningProcess -Force; exit 0 }; Write-Host 'Port 3000 is not owned by BetPay. Nothing was stopped.'; exit 1"
+  if errorlevel 1 exit /b 1
+  echo BetPay local server stopped.
   goto :end
 )
 

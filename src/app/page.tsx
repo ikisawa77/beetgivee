@@ -22,7 +22,7 @@ const leagues: League[] = [
 ];
 
 const ads: Ad[] = [
-  { id: "slide-1", placement: "HOME_SLIDER", active: true, title: "วิเคราะห์บอลครบทุกคู่", imageUrl: "https://images.unsplash.com/photo-1579952363873-27d3bfad9c0d?auto=format&fit=crop&w=1600&q=85", targetUrl: "/plans" },
+  { id: "slide-1", placement: "HOME_SLIDER", active: true, title: "วิเคราะห์บอลครบทุกคู่", imageUrl: "https://images.unsplash.com/photo-1522778526097-ce0a22ceb253?auto=format&fit=crop&w=1600&q=85", targetUrl: "/plans" },
   { id: "slide-2", placement: "HOME_SLIDER", active: true, title: "สมาชิก Silver ดูทีเด็ดได้เต็ม", imageUrl: "https://images.unsplash.com/photo-1553778263-73a83bab9b0c?auto=format&fit=crop&w=1600&q=85", targetUrl: "/plans" },
   { id: "slide-3", placement: "HOME_SLIDER", active: true, title: "วัดผลจริงทุกวัน", imageUrl: "https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&w=1600&q=85", targetUrl: "/results" },
   { id: "mid", placement: "HOME_MID", active: true, title: "โปรรายเดือน Silver", imageUrl: "https://images.unsplash.com/photo-1522778526097-ce0a22ceb253?auto=format&fit=crop&w=1200&q=85", targetUrl: "/plans" },
