@@ -68,6 +68,8 @@ a { color: inherit; text-decoration: none; }
 .odds { color: #278bd8; font-weight: 700; }
 .locked-row { background: #fbfcfb; }
 .locked-cell { color: #9ba9a1; }
+.lock-banner { display: flex; align-items: center; gap: 9px; margin: 16px 20px 20px; padding: 13px 14px; border: 1px dashed #b9cec2; border-radius: 8px; color: var(--muted); font-size: 11px; }
+.lock-banner button { margin-left: auto; border: 0; background: transparent; color: var(--green); font-size: 11px; font-weight: 700; white-space: nowrap; }
 .lock-chip { display: inline-flex; gap: 5px; align-items: center; color: #7d8983; font-size: 11px; }
 .side-panel { padding: 0; }
 .rank-list { padding: 7px 20px 14px; }
