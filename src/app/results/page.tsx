@@ -1,6 +1,10 @@
 import Link from "next/link";
-import { ArrowLeft, Check, CircleAlert, Minus, X } from "lucide-react";
+import { cookies } from "next/headers";
+import { ArrowLeft, Check, CircleAlert, LockKeyhole, Minus, Sparkles, X } from "lucide-react";
 import { summarizeDailyPredictions } from "../../lib/daily-predictions";
+import { verifySessionToken } from "../../lib/auth";
+
+export const dynamic = "force-dynamic";
 
 const records = [
   { date: "2026-08-09", league: "สวีเดน ออลสเวนส์คาน", time: "19:00", home: "มัลโม่ FF", away: "ฮัมมาร์บี้", predictedTeam: "มัลโม่ FF", actualWinner: "มัลโม่ FF", score: "2 - 0" },
@@ -17,6 +21,12 @@ function Outcome({ actualWinner, predictedTeam }: { actualWinner: string; predic
   return actualWinner === predictedTeam ? <span className="result-status won"><Check size={13} />ทายถูก</span> : <span className="result-status lost"><X size={13} />ทายผิด</span>;
 }
 
+function MemberOnlyNotice() {
+  return <main className="results-shell"><header className="results-header"><Link href="/" className="back-link"><ArrowLeft size={16} />กลับหน้าทีเด็ด</Link><div className="simple-brand">Bet<span>Pay</span></div><div className="results-header-note">พื้นที่สำหรับสมาชิก</div></header><div className="results-access-page"><div className="results-access-mark"><LockKeyhole size={22} /></div><div className="simple-kicker">MEMBERS ONLY</div><h1>สรุปผลการแข่งขันสำหรับสมาชิก</h1><p>เข้าสู่ระบบสมาชิกเพื่อดูสถิติการทายผลรายวัน ผลการแข่งขัน และประวัติผลงานของทีเด็ด BetPay แบบเต็มรูปแบบ</p><div className="results-access-actions"><Link className="payment-submit" href="/login"><Sparkles size={16} />เข้าสู่ระบบสมาชิก</Link><Link className="back-link" href="/signup">สมัครสมาชิกใหม่ <ArrowLeft size={15} /></Link></div></div></main>;
+}
+
 export default function ResultsPage() {
+  const token = cookies().get("betpay_session")?.value;
+  if (!verifySessionToken(token)) return <MemberOnlyNotice />;
   return <main className="results-shell"><header className="results-header"><Link href="/" className="back-link"><ArrowLeft size={16} />กลับหน้าทีเด็ด</Link><div className="simple-brand">Bet<span>Pay</span></div><div className="results-header-note">ผลประจำวันที่ 09 ส.ค. 2026</div></header><div className="results-page"><div className="simple-kicker">DAILY PERFORMANCE</div><h1>สรุปผลการทำนาย</h1><p className="simple-lead">ตรวจสอบผลจากทีเด็ดที่เผยแพร่ในแต่ละวัน แยกชัดเจนว่าทายทีมชนะถูกหรือพลาด</p><section className="result-overview"><div><span className="overview-label">ความแม่นยำวันนี้</span><strong>{summary.accuracy}%</strong><span className="overview-sub">จาก {summary.settled} คู่ที่จบแล้ว</span></div><div className="overview-stat"><span>ทายถูก</span><b className="green-text">{summary.correct}</b></div><div className="overview-stat"><span>ทายผิด</span><b className="red-text">{summary.incorrect}</b></div><div className="overview-stat"><span>รอผล</span><b>{summary.pending}</b></div></section><section className="results-table-panel"><div className="panel-head"><strong>ผลการแข่งขันและการทำนาย</strong><small>คู่ที่เผยแพร่ทั้งหมดของวัน</small></div><div className="table-wrap"><table className="results-table"><thead><tr><th>เวลา</th><th>ลีก</th><th>คู่แข่งขัน</th><th>ทีมที่ทาย</th><th>ผลจริง</th><th>สถานะ</th></tr></thead><tbody>{records.map((record) => <tr key={`${record.league}-${record.time}`}><td className="fixture-time">{record.time}</td><td className="result-league">{record.league}</td><td><b>{record.home}</b><span className="versus"> vs </span><b>{record.away}</b><small className="score">{record.score}</small></td><td className="predicted">{record.predictedTeam}</td><td>{record.actualWinner === "PENDING" ? "-" : record.actualWinner === "DRAW" ? "เสมอ" : record.actualWinner}</td><td><Outcome actualWinner={record.actualWinner} predictedTeam={record.predictedTeam} /></td></tr>)}</tbody></table></div></section></div></main>;
 }
