@@ -233,6 +233,8 @@ model SiteSetting {
   facebookUrl String   @default("")
   email       String   @default("")
   footerText  String   @default("ข้อมูลเพื่อประกอบการตัดสินใจเท่านั้น โปรดใช้วิจารณญาณในการรับชม")
+  loaderEnabled Boolean @default(true)
+  loaderDuration Int @default(1400)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

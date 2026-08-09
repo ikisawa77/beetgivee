@@ -8,6 +8,8 @@ export type SiteSettings = {
   facebookUrl: string;
   email: string;
   footerText: string;
+  loaderEnabled: boolean;
+  loaderDuration: number;
 };
 
 export const defaultSiteSettings: SiteSettings = {
@@ -20,8 +22,13 @@ export const defaultSiteSettings: SiteSettings = {
   facebookUrl: "",
   email: "",
   footerText: "ข้อมูลเพื่อประกอบการตัดสินใจเท่านั้น โปรดใช้วิจารณญาณในการรับชม",
+  loaderEnabled: true,
+  loaderDuration: 1400,
 };
 
 export function normalizeSiteSettings(value: Partial<SiteSettings> | null | undefined): SiteSettings {
-  return { ...defaultSiteSettings, ...Object.fromEntries(Object.entries(value ?? {}).filter(([, item]) => typeof item === "string")) } as SiteSettings;
+  const strings = Object.fromEntries(Object.entries(value ?? {}).filter(([, item]) => typeof item === "string"));
+  const loaderEnabled = typeof value?.loaderEnabled === "boolean" ? value.loaderEnabled : defaultSiteSettings.loaderEnabled;
+  const candidateDuration = typeof value?.loaderDuration === "number" && Number.isFinite(value.loaderDuration) ? value.loaderDuration : defaultSiteSettings.loaderDuration;
+  return { ...defaultSiteSettings, ...strings, loaderEnabled, loaderDuration: Math.round(Math.min(6000, Math.max(400, candidateDuration))) };
 }

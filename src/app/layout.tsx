@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Prompt } from "next/font/google";
 import "./globals.css";
+import { LoaderProgressiveBar } from "../components/loader-progressive-bar";
 
 const prompt = Prompt({
   subsets: ["thai", "latin"],
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="th">
-      <body className={prompt.variable}>{children}</body>
+      <body className={prompt.variable}><LoaderProgressiveBar />{children}</body>
     </html>
   );
 }
