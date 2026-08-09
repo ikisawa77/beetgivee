@@ -1,0 +1,201 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum MembershipTier {
+  SILVER
+  GOLD
+}
+
+enum PaymentStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  REVIEW
+}
+
+enum AiJobStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum TipStatus {
+  DRAFT
+  PUBLISHED
+  SETTLED
+}
+
+enum PickOutcome {
+  PENDING
+  WON
+  LOST
+  VOID
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  passwordHash  String
+  displayName   String
+  role          Role           @default(MEMBER)
+  subscriptions Subscription[]
+  payments      PaymentAttempt[]
+  uploads       Upload[]
+  auditLogs     AuditLog[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model SubscriptionPlan {
+  id            String         @id @default(cuid())
+  name          String
+  tier          MembershipTier
+  months        Int
+  price         Decimal        @db.Decimal(10, 2)
+  active        Boolean        @default(true)
+  subscriptions Subscription[]
+  payments      PaymentAttempt[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  @@unique([tier, months])
+}
+
+model Subscription {
+  id        String           @id @default(cuid())
+  userId    String
+  planId    String
+  tier      MembershipTier
+  startsAt  DateTime
+  expiresAt DateTime
+  user      User             @relation(fields: [userId], references: [id])
+  plan      SubscriptionPlan @relation(fields: [planId], references: [id])
+  createdAt DateTime         @default(now())
+  @@index([userId, expiresAt])
+}
+
+model PaymentAttempt {
+  id              String        @id @default(cuid())
+  userId          String
+  planId          String
+  status          PaymentStatus @default(PENDING)
+  amount          Decimal       @db.Decimal(10, 2)
+  slipPath        String
+  slipFingerprint String        @unique
+  refTxid         String?       @unique
+  providerMessage String?
+  providerPayload Json?
+  user            User          @relation(fields: [userId], references: [id])
+  plan            SubscriptionPlan @relation(fields: [planId], references: [id])
+  createdAt       DateTime      @default(now())
+  verifiedAt      DateTime?
+  @@index([userId, status])
+}
+
+model Upload {
+  id        String   @id @default(cuid())
+  userId    String
+  path      String
+  mimeType  String
+  size      Int
+  user      User     @relation(fields: [userId], references: [id])
+  aiJobs    AiAnalysisJob[]
+  createdAt DateTime @default(now())
+}
+
+model AiAnalysisJob {
+  id          String      @id @default(cuid())
+  uploadId    String
+  status      AiJobStatus @default(QUEUED)
+  rawResponse Json?
+  error       String?
+  upload      Upload      @relation(fields: [uploadId], references: [id])
+  tipSheet    TipSheet?
+  createdAt   DateTime    @default(now())
+  completedAt DateTime?
+}
+
+model TipSheet {
+  id        String      @id @default(cuid())
+  title     String
+  sheetDate DateTime
+  status    TipStatus   @default(DRAFT)
+  aiJobId   String?     @unique
+  aiJob     AiAnalysisJob? @relation(fields: [aiJobId], references: [id])
+  leagues   League[]
+  summary   DailySummary?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  @@index([sheetDate, status])
+}
+
+model League {
+  id        String    @id @default(cuid())
+  name      String
+  country   String
+  sheetId   String
+  sheet     TipSheet  @relation(fields: [sheetId], references: [id])
+  matches   Match[]
+}
+
+model Match {
+  id          String      @id @default(cuid())
+  leagueId    String
+  kickoffAt   DateTime
+  homeTeam    String
+  awayTeam    String
+  league      League      @relation(fields: [leagueId], references: [id])
+  picks       Pick[]
+  createdAt   DateTime    @default(now())
+}
+
+model Pick {
+  id         String      @id @default(cuid())
+  matchId    String
+  selection  String
+  odds       Decimal     @db.Decimal(5, 2)
+  confidence Int
+  analysis   String
+  status     TipStatus   @default(DRAFT)
+  outcome    PickOutcome @default(PENDING)
+  sortOrder  Int         @default(0)
+  match      Match       @relation(fields: [matchId], references: [id])
+  settledAt  DateTime?
+  @@index([matchId, status, sortOrder])
+}
+
+model DailySummary {
+  id           String   @id @default(cuid())
+  sheetId      String   @unique
+  settled      Int      @default(0)
+  won          Int      @default(0)
+  lost         Int      @default(0)
+  void         Int      @default(0)
+  winRate      Decimal  @default(0) @db.Decimal(5, 2)
+  returnUnits  Decimal  @default(0) @db.Decimal(8, 2)
+  sheet        TipSheet @relation(fields: [sheetId], references: [id])
+  updatedAt    DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  entity    String
+  entityId  String
+  metadata  Json?
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  @@index([entity, entityId])
+}
